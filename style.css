@@ -1,0 +1,14 @@
+body {
+    background-color: #222;
+    overflow: hidden; /* Keeps labels from causing scrollbars */
+}
+
+.label {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+    border: 1px solid #000;
+}
