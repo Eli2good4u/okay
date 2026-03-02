@@ -3,7 +3,7 @@ const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) +
 
 // Create 50 labels initially (or they won't exist for the code to find)
 const container = document.getElementById('container');
-for (let i = 1; i <= 50; i++) {
+for (let i = 1; i <= 5000; i++) {
     let lbl = document.createElement('div');
     lbl.id = "label" + i;
     lbl.className = "label";
