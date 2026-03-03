@@ -1,5 +1,5 @@
 body {
-    background-color: #222;
+    background-color: rgb(255,255,255);
     overflow: hidden; /* Keeps labels from causing scrollbars */
 }
 
@@ -13,12 +13,28 @@ body {
     border: 1px solid #000;
 }
 
-.startBtn {
+#startBtn {
     position: absolute;
-    transform-origin: center;
-    height: 0.05vh;
-    width: 0.05vw;
-    x: 0.5vw;
-    y: 0.5vh;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 60px;  
+    width: 150px;
+    background-color: blue;
+  
+  	box-shadow: 0 0 20px 5px rgba(0, 0, 0, 0.5);
+    
+    border: solid;
+    border-color: rgba(0,10,160,1);
+    outline: none; 
+    border-radius: 3vw; /* Removed the ' here */
+  
+    /* Now the browser can read this: */
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+    
+    cursor: pointer; 
 }
 
