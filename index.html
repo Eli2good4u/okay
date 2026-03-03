@@ -5,7 +5,7 @@
         body {
             margin: 0;
             overflow: hidden;
-            font-family: Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
         }
         
         #container {
@@ -20,10 +20,13 @@
             align-items: center;
             justify-content: center;
             color: white;
-            text-shadow: 2px 2px 2px black;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             font-weight: bold;
-            border-radius: 10px;
-            transition: all 0.3s;
+            font-size: 14px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: all 0.05s linear;
+            border: 2px solid rgba(255,255,255,0.3);
         }
         
         #startBtn {
@@ -31,25 +34,32 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 15px 30px;
-            font-size: 20px;
-            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            padding: 18px 40px;
+            font-size: 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             z-index: 1000;
             font-weight: bold;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 2px solid rgba(255,255,255,0.3);
         }
         
         #startBtn:hover {
-            transform: translateX(-50%) scale(1.05);
+            transform: translateX(-50%) scale(1.1);
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+        
+        #startBtn:active {
+            transform: translateX(-50%) scale(0.95);
         }
     </style>
 </head>
 <body>
-    <button id="startBtn">LET'S GO! 🎵</button>
+    <button id="startBtn">🚀 GO INFINITE 🚀</button>
     <div id="container"></div>
 
     <script>
@@ -62,8 +72,12 @@
             let lbl = document.createElement('div');
             lbl.id = "label" + i;
             lbl.className = "label";
-            lbl.innerText = "OFF";
-            lbl.style.backgroundColor = "#333";
+            lbl.innerText = "💤 SLEEP";
+            lbl.style.backgroundColor = "#2c3e50";
+            lbl.style.width = "100px";
+            lbl.style.height = "100px";
+            lbl.style.left = randomNumber(0, window.innerWidth - 120) + "px";
+            lbl.style.top = randomNumber(0, window.innerHeight - 120) + "px";
             container.appendChild(lbl);
         }
 
@@ -78,32 +92,62 @@
             if (stateB === true && stateA === true) {
                 // Play sound with better error handling
                 let audio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-                audio.play().catch(e => console.log("Audio play failed:", e));
+                audio.volume = 0.7;
+                audio.play().catch(e => console.log("Click the page first to enable audio:", e));
+
+                // Change button text to show it's active
+                document.getElementById("startBtn").textContent = "🔴 INFINITE MODE ACTIVE 🔴";
+                document.getElementById("startBtn").style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
 
                 setTimeout(function() {
-                    // Fixed loop for browser performance
-                    let count = 0;
+                    // INFINITE LOOP - runs forever every 50ms (like 9999 but literally forever)
                     function updateLabels() {
+                        // Loop through all 500 labels
                         for (let x = 1; x <= 500; x++) {
                             let el = document.getElementById("label" + x);
                             if (el) {
-                                el.innerText = "ACTIVE 💫";
-                                el.style.width = randomNumber(70, 200) + "px";
-                                el.style.height = randomNumber(70, 200) + "px";
-                                el.style.left = randomNumber(0, window.innerWidth - 200) + "px";
-                                el.style.top = randomNumber(0, window.innerHeight - 200) + "px";
-                                el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+                                // Random text every time
+                                const texts = ["LIT", "🔥", "FIRE", "YO", "CUH", "💯", "ACTIVE", "WAVE", "VIBE", "🤙", "FLEX", "GANG"];
+                                el.innerText = texts[Math.floor(Math.random() * texts.length)];
+                                
+                                // Random size between 50 and 250px
+                                let size = randomNumber(50, 250);
+                                el.style.width = size + "px";
+                                el.style.height = size + "px";
+                                
+                                // Random position (keep within window)
+                                el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
+                                el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
+                                
+                                // Random bright colors
+                                el.style.backgroundColor = `rgb(${randomNumber(100,255)},${randomNumber(100,255)},${randomNumber(100,255)})`;
+                                
+                                // Random rotation for extra spice
+                                el.style.transform = `rotate(${randomNumber(-15, 15)}deg)`;
+                                
+                                // Random border radius
+                                el.style.borderRadius = randomNumber(0, 50) + "%";
                             }
                         }
                         
-                        count++;
-                        if (count < 999) { // Run 999 times like you wanted
-                            setTimeout(updateLabels, 50);
-                        }
+                        // Call itself again after 50ms - INFINITE LOOP
+                        setTimeout(updateLabels, 50);
                     }
                     
-                    updateLabels(); // Start the animation sequence
-                }, 2000);
+                    updateLabels(); // Start the infinite animation
+                }, 2000); // 2 second delay
+            }
+        });
+
+        // Update positions on window resize so squares stay visible
+        window.addEventListener('resize', function() {
+            for (let x = 1; x <= 500; x++) {
+                let el = document.getElementById("label" + x);
+                if (el) {
+                    let size = parseInt(el.style.width) || 100;
+                    el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
+                    el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
+                }
             }
         });
     </script>
