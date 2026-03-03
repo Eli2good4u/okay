@@ -13,6 +13,7 @@
             position: relative;
             width: 100vw;
             height: 100vh;
+            transform: translateZ(0); /* Force GPU acceleration */
         }
         
         .label {
@@ -27,7 +28,10 @@
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
             border: 2px solid rgba(255,255,255,0.5);
-            transition: all 0.05s ease;
+            will-change: transform, left, top, width, height, background-color;
+            transition: all 0.05s linear; /* Use linear for smoother performance */
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
         }
         
         #startBtn {
@@ -48,6 +52,7 @@
             box-shadow: 0 10px 30px rgba(255,0,128,0.5);
             border: 2px solid rgba(255,255,255,0.3);
             text-transform: uppercase;
+            -webkit-tap-highlight-color: transparent;
         }
         
         #startBtn:hover {
@@ -66,6 +71,7 @@
             font-weight: bold;
             border: 2px solid #ff0;
             z-index: 1000;
+            backdrop-filter: blur(2px);
         }
 
         #statusDisplay {
@@ -80,211 +86,289 @@
             font-weight: bold;
             border: 2px solid #0ff;
             z-index: 1000;
+            backdrop-filter: blur(2px);
         }
     </style>
 </head>
 <body>
-    <button id="startBtn">🎵 50MS PARTY 🎵</button>
+    <button id="startBtn">🎵 OVERLAP PARTY 🎵</button>
     <div id="countDisplay">Sounds: 0</div>
     <div id="statusDisplay">Status: Ready</div>
     <div id="container"></div>
 
     <script>
-        // Helper for random numbers
-        const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        (function() {
+            "use strict";
 
-        // Array to hold our 50 elements
-        let elements = [];
-        let soundCount = 0;
-        let isPlaying = false;
-        let audioEnabled = false;
-        
-        // Pre-load the audio to make it play faster
-        const audioCache = [];
-        for (let i = 0; i < 10; i++) {
-            let audio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-            audio.load();
-            audioCache.push(audio);
-        }
-        let audioIndex = 0;
+            // --- Configuration ---
+            const ELEMENT_COUNT = 50;          // 50 squares
+            const UPDATE_INTERVAL_MS = 50;      // 50ms updates
+            const VOLUME = 0.15;                 // Lower volume for many overlaps
+            const AUDIO_URL = "https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3";
 
-        // Enable audio on first click anywhere
-        document.body.addEventListener('click', function enableAudio() {
-            audioEnabled = true;
-            document.getElementById('statusDisplay').innerHTML = 'Status: Audio Ready ✅';
-            
-            // Play a test sound to unlock audio
-            let testAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-            testAudio.volume = 0.1;
-            testAudio.play().then(() => {
-                testAudio.pause();
-                testAudio.currentTime = 0;
-            }).catch(e => console.log("Test audio:", e));
-            
-            document.body.removeEventListener('click', enableAudio);
-            console.log("Audio enabled cuh!");
-        }, { once: true });
+            // --- Helper ---
+            const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // Function to play sound instantly
-        function playSound() {
-            if (!audioEnabled || !isPlaying) return;
-            
-            soundCount++;
-            document.getElementById('countDisplay').innerHTML = `Sounds: ${soundCount}`;
-            
-            // Use cached audio for instant playback
-            let audio = audioCache[audioIndex];
-            audio.currentTime = 0;
-            audio.volume = 0.2;
-            
-            audio.play().catch(e => {
-                // If fail, create new one
-                let newAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-                newAudio.volume = 0.2;
-                newAudio.play().catch(err => console.log("Still blocked:", err));
-            });
-            
-            // Cycle through cached audio
-            audioIndex = (audioIndex + 1) % audioCache.length;
-        }
-
-        // Create initial 50 elements
-        function createInitialElements() {
+            // --- DOM Elements ---
             const container = document.getElementById('container');
-            container.innerHTML = '';
-            elements = [];
-            
-            for (let i = 0; i < 50; i++) {
-                let lbl = document.createElement('div');
-                lbl.className = 'label';
-                lbl.id = 'element_' + i;
-                
-                // Set initial random properties
-                let size = randomNumber(40, 150);
-                lbl.style.width = size + "px";
-                lbl.style.height = size + "px";
-                lbl.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
-                lbl.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
-                lbl.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
-                lbl.innerText = ["nigger", "NIGGER", "nigga"][Math.floor(Math.random() * 6)];
-                
-                container.appendChild(lbl);
-                elements.push(lbl);
-            }
-        }
+            const startBtn = document.getElementById('startBtn');
+            const countDisplay = document.getElementById('countDisplay');
+            const statusDisplay = document.getElementById('statusDisplay');
 
-        // Update all elements with random properties
-        function updateAllElements() {
-            elements.forEach(el => {
-                // Random text
-                const texts = ["nigger", "NIGGER", "nigga"];
-                el.innerText = texts[Math.floor(Math.random() * texts.length)];
-                
-                // Random size between 40 and 150px
-                let size = randomNumber(40, 150);
-                el.style.width = size + "px";
-                el.style.height = size + "px";
-                
-                // Random position
-                el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
-                el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
-                
-                // Random bright colors
-                el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
-                
-                // Random rotation
-                el.style.transform = `rotate(${randomNumber(-15, 15)}deg)`;
-                
-                // Random border radius
-                el.style.borderRadius = randomNumber(0, 50) + "%";
-            });
-            
-            // Play sound EVERY time shapes change
-            playSound();
-        }
+            // --- State ---
+            let elements = [];               // Array of label divs
+            let isPlaying = false;
+            let soundCount = 0;
+            let animFrame = null;
+            let lastUpdate = 0;
 
-        // Main animation loop - updates every 50ms
-        function startInfiniteLoop() {
-            if (!isPlaying) return;
-            
-            // Update all 50 elements and play sound
-            updateAllElements();
-            
-            // Call itself again after 50ms
-            setTimeout(startInfiniteLoop, 50);
-        }
+            // --- Web Audio API stuff ---
+            let audioContext = null;
+            let audioBuffer = null;
+            let audioInitialized = false;
 
-        // Initialize
-        createInitialElements();
-
-        document.getElementById("startBtn").addEventListener("click", function() {
-            if (isPlaying) return;
-            
-            // Reset sound count
-            soundCount = 0;
-            document.getElementById('countDisplay').innerHTML = `Sounds: 0`;
-            
-            let stateA = false;
-            let stateB = true;
-
-            if (stateB === true) {
-                stateA = true;
-            }
-
-            if (stateB === true && stateA === true) {
-                isPlaying = true;
-                
-                // Change button
-                this.textContent = "🔴 PARTY ACTIVE (50ms) 🔴";
-                this.style.background = "linear-gradient(135deg, #ff0000 0%, #ff0066 100%)";
-                document.getElementById('statusDisplay').innerHTML = 'Status: PARTY MODE 🎉';
-                
-                // If audio not enabled yet, force enable
-                if (!audioEnabled) {
-                    audioEnabled = true;
-                    // Play a silent sound to unlock
-                    let unlockAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-                    unlockAudio.volume = 0.01;
-                    unlockAudio.play().catch(e => console.log("Unlock attempt:", e));
-                }
-                
-                // Start immediately after 2 seconds
-                setTimeout(() => {
-                    if (isPlaying) {
-                        startInfiniteLoop();
+            // --- Preload audio using Web Audio ---
+            async function loadAudio() {
+                try {
+                    const response = await fetch(AUDIO_URL);
+                    const arrayBuffer = await response.arrayBuffer();
+                    // Create context only after user gesture (will be done in initAudio)
+                    // But we can decode now if context exists, otherwise store and decode later
+                    if (audioContext) {
+                        audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+                    } else {
+                        // Wait for context then decode
+                        const checkContext = () => {
+                            if (audioContext) {
+                                audioContext.decodeAudioData(arrayBuffer.slice(0))
+                                    .then(buffer => audioBuffer = buffer)
+                                    .catch(e => console.error('Decode error', e));
+                            } else {
+                                setTimeout(checkContext, 100);
+                            }
+                        };
+                        checkContext();
                     }
-                }, 2000);
+                } catch (e) {
+                    console.error('Failed to load audio', e);
+                }
             }
-        });
+            loadAudio();
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            if (elements.length > 0 && !isPlaying) {
+            // --- Initialize Audio Context (must be called after user gesture) ---
+            function initAudio() {
+                if (audioInitialized) return;
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                audioInitialized = true;
+                // Resume if suspended
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                // If buffer already loaded, keep it; otherwise decode will happen later
+                statusDisplay.innerHTML = 'Status: Audio Ready ✅';
+            }
+
+            // --- Play a sound (overlapping capable) ---
+            function playSound() {
+                if (!audioInitialized || !audioContext || audioContext.state !== 'running' || !isPlaying) return;
+
+                // Increment counter
+                soundCount++;
+                countDisplay.innerHTML = `Sounds: ${soundCount}`;
+
+                // If buffer not ready, try again later (skip this sound)
+                if (!audioBuffer) return;
+
+                // Create buffer source
+                const source = audioContext.createBufferSource();
+                source.buffer = audioBuffer;
+
+                // Create gain node for volume control
+                const gainNode = audioContext.createGain();
+                gainNode.gain.value = VOLUME;
+
+                // Connect: source -> gain -> destination
+                source.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                // Start instantly
+                source.start(0);
+            }
+
+            // --- Create all 50 squares ---
+            function createElements() {
+                container.innerHTML = '';
+                elements = [];
+                for (let i = 0; i < ELEMENT_COUNT; i++) {
+                    const lbl = document.createElement('div');
+                    lbl.className = 'label';
+                    // Set initial random properties
+                    const size = randomNumber(40, 150);
+                    lbl.style.width = size + 'px';
+                    lbl.style.height = size + 'px';
+                    lbl.style.left = randomNumber(0, window.innerWidth - size - 20) + 'px';
+                    lbl.style.top = randomNumber(0, window.innerHeight - size - 20) + 'px';
+                    lbl.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+                    lbl.innerText = ["nigger", "NIGGER", "nigga"][Math.floor(Math.random() * 6)];
+                    container.appendChild(lbl);
+                    elements.push(lbl);
+                }
+            }
+
+            // --- Update all squares with new random properties ---
+            function updateAllElements() {
+                const w = window.innerWidth;
+                const h = window.innerHeight;
+                for (let i = 0; i < elements.length; i++) {
+                    const el = elements[i];
+                    // Random text
+                    const texts = ["nigger", "NIGGER", "nigga"];
+                    el.innerText = texts[Math.floor(Math.random() * texts.length)];
+
+                    // Random size
+                    const size = randomNumber(40, 150);
+                    el.style.width = size + 'px';
+                    el.style.height = size + 'px';
+
+                    // Random position (stay inside viewport)
+                    el.style.left = randomNumber(0, w - size - 20) + 'px';
+                    el.style.top = randomNumber(0, h - size - 20) + 'px';
+
+                    // Random color
+                    el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+
+                    // Random rotation (use transform for GPU)
+                    el.style.transform = `rotate(${randomNumber(-15, 15)}deg)`;
+
+                    // Random border radius
+                    el.style.borderRadius = randomNumber(0, 50) + '%';
+                }
+
+                // Play 50 overlapping sounds (one per element)
+                for (let i = 0; i < elements.length; i++) {
+                    playSound();
+                }
+            }
+
+            // --- Animation loop (throttled to 50ms) ---
+            function loop(now) {
+                if (!isPlaying) return;
+                if (now - lastUpdate >= UPDATE_INTERVAL_MS) {
+                    lastUpdate = now;
+                    updateAllElements();
+                }
+                animFrame = requestAnimationFrame(loop);
+            }
+
+            // --- Start the party ---
+            function startParty() {
+                if (isPlaying) return;
+
+                // Reset sound count
+                soundCount = 0;
+                countDisplay.innerHTML = 'Sounds: 0';
+
+                // Ensure audio is initialized (user already clicked)
+                if (!audioInitialized) {
+                    initAudio();
+                } else if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                isPlaying = true;
+                startBtn.textContent = '🔴 OVERLAP ACTIVE (50ms) 🔴';
+                startBtn.style.background = 'linear-gradient(135deg, #ff0000 0%, #ff0066 100%)';
+                statusDisplay.innerHTML = 'Status: PARTY MODE 🎉';
+
+                lastUpdate = performance.now();
+                animFrame = requestAnimationFrame(loop);
+            }
+
+            // --- Stop the party ---
+            function stopParty() {
+                if (!isPlaying) return;
+                isPlaying = false;
+                if (animFrame) {
+                    cancelAnimationFrame(animFrame);
+                    animFrame = null;
+                }
+                startBtn.textContent = '🎵 OVERLAP PARTY 🎵';
+                startBtn.style.background = 'linear-gradient(135deg, #ff0080 0%, #ff8c00 100%)';
+                statusDisplay.innerHTML = 'Status: Stopped ⏹️';
+                soundCount = 0;
+                countDisplay.innerHTML = 'Sounds: 0';
+                // Optionally re-create elements to reset positions (but keep them)
+                // We'll just reposition them randomly without changing text too much
                 elements.forEach(el => {
-                    let size = parseInt(el.style.width) || 100;
-                    el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
-                    el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
+                    const size = parseInt(el.style.width) || 100;
+                    el.style.left = randomNumber(0, window.innerWidth - size - 20) + 'px';
+                    el.style.top = randomNumber(0, window.innerHeight - size - 20) + 'px';
                 });
             }
-        });
 
-        // Stop party (double click anywhere)
-        document.body.addEventListener('dblclick', function() {
-            if (isPlaying) {
-                isPlaying = false;
-                createInitialElements();
-                document.getElementById("startBtn").textContent = "🎵 50MS PARTY 🎵";
-                document.getElementById("startBtn").style.background = "linear-gradient(135deg, #ff0080 0%, #ff8c00 100%)";
-                document.getElementById('statusDisplay').innerHTML = 'Status: Stopped ⏹️';
-                soundCount = 0;
-                document.getElementById('countDisplay').innerHTML = `Sounds: 0`;
-                console.log("Party stopped cuh!");
+            // --- Initialize UI ---
+            createElements();
+
+            // --- Event Listeners ---
+            // One-click to enable audio (and also start if button not used?)
+            document.body.addEventListener('click', function enableAudio(e) {
+                // Ignore if click on button (button will handle start)
+                if (e.target === startBtn) return;
+                if (!audioInitialized) {
+                    initAudio();
+                } else if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                statusDisplay.innerHTML = 'Status: Audio Ready ✅';
+                // Remove this listener after first non-button click
+                document.body.removeEventListener('click', enableAudio);
+            }, { once: true });
+
+            // Start button
+            startBtn.addEventListener('click', function() {
+                // Ensure audio is initialized (user might not have clicked elsewhere)
+                if (!audioInitialized) {
+                    initAudio();
+                } else if (audioContext && audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+                // If already playing, stop? Let's toggle: if playing, stop; else start.
+                if (isPlaying) {
+                    stopParty();
+                } else {
+                    startParty();
+                }
+            });
+
+            // Double-click anywhere to stop (including on button)
+            document.body.addEventListener('dblclick', function(e) {
+                e.stopPropagation();
+                stopParty();
+            });
+
+            // Handle window resize to keep squares inside view
+            window.addEventListener('resize', function() {
+                if (!isPlaying) {
+                    // Reposition randomly within new bounds
+                    elements.forEach(el => {
+                        const size = parseInt(el.style.width) || 100;
+                        el.style.left = randomNumber(0, window.innerWidth - size - 20) + 'px';
+                        el.style.top = randomNumber(0, window.innerHeight - size - 20) + 'px';
+                    });
+                }
+                // When playing, the loop will update positions anyway
+            });
+
+            // Touch devices: ensure taps don't zoom or cause issues
+            startBtn.addEventListener('touchstart', (e) => e.preventDefault());
+
+            // For Chromebooks/low-end devices: reduce paint complexity by hinting
+            if ('connection' in navigator && navigator.connection) {
+                // Optional: detect slow connection and reduce something? Not needed.
             }
-        });
 
-        // Click instructions
-        console.log("Click anywhere first to enable audio, then hit the button cuh!");
-
+            console.log('Ready cuh! Click anywhere to enable audio, then hit the button.');
+        })();
     </script>
 </body>
 </html>
