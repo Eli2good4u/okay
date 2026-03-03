@@ -1,13 +1,111 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>NIGGER APP</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+        
+        .label {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 2px 2px 2px black;
+            font-weight: bold;
+            border-radius: 10px;
+            transition: all 0.3s;
+        }
+        
+        #startBtn {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            z-index: 1000;
+            font-weight: bold;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        #startBtn:hover {
+            transform: translateX(-50%) scale(1.05);
+        }
+    </style>
 </head>
 <body>
-    <button id="startBtn">NIGGER</button>
+    <button id="startBtn">LET'S GO! 🎵</button>
     <div id="container"></div>
 
-    <script src="script.js"></script>
+    <script>
+        // Helper for random numbers
+        const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+        // Create 500 labels initially
+        const container = document.getElementById('container');
+        for (let i = 1; i <= 500; i++) {
+            let lbl = document.createElement('div');
+            lbl.id = "label" + i;
+            lbl.className = "label";
+            lbl.innerText = "OFF";
+            lbl.style.backgroundColor = "#333";
+            container.appendChild(lbl);
+        }
+
+        document.getElementById("startBtn").addEventListener("click", function() {
+            let stateA = false;
+            let stateB = true;
+
+            if (stateB === true) {
+                stateA = true;
+            }
+
+            if (stateB === true && stateA === true) {
+                // Play sound with better error handling
+                let audio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
+                audio.play().catch(e => console.log("Audio play failed:", e));
+
+                setTimeout(function() {
+                    // Fixed loop for browser performance
+                    let count = 0;
+                    function updateLabels() {
+                        for (let x = 1; x <= 500; x++) {
+                            let el = document.getElementById("label" + x);
+                            if (el) {
+                                el.innerText = "ACTIVE 💫";
+                                el.style.width = randomNumber(70, 200) + "px";
+                                el.style.height = randomNumber(70, 200) + "px";
+                                el.style.left = randomNumber(0, window.innerWidth - 200) + "px";
+                                el.style.top = randomNumber(0, window.innerHeight - 200) + "px";
+                                el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+                            }
+                        }
+                        
+                        count++;
+                        if (count < 999) { // Run 999 times like you wanted
+                            setTimeout(updateLabels, 50);
+                        }
+                    }
+                    
+                    updateLabels(); // Start the animation sequence
+                }, 2000);
+            }
+        });
+    </script>
 </body>
 </html>
