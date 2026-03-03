@@ -24,8 +24,9 @@ document.getElementById("startBtn").addEventListener("click", function() {
 
         setTimeout(function() {
             // WARNING: 9999 is a massive loop; reduced here for browser safety
-            for (let i = 0; i < 9999; i++) {
-                for (let x = 1; x <= 50000; x++) {
+            for (let i = 0; i < 999999; i++) {
+                setTimeout(function(){
+                    for (let x = 1; x <= 50000; x++) {
                     let el = document.getElementById("label" + x);
                     el.innerText = "ACTIVE";
                     el.style.width = randomNumber(70, 200) + "px";
@@ -33,7 +34,8 @@ document.getElementById("startBtn").addEventListener("click", function() {
                     el.style.left = randomNumber(0, window.innerWidth - 200) + "px";
                     el.style.top = randomNumber(0, window.innerHeight - 200) + "px";
                     el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
-                }
+                    }
+                }, 50);
             }
         }, 2000);
     }
