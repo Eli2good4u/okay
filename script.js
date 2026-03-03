@@ -24,9 +24,9 @@ document.getElementById("startBtn").addEventListener("click", function() {
 
         setTimeout(function() {
             // WARNING: 9999 is a massive loop; reduced here for browser safety
-            for (let i = 0; i < 999999999999; i++) {
+            for (let i = 0; i < 99999; i++) {
                 setTimeout(function(){
-                    for (let x = 1; x <= 500000000000000; x++) {
+                    for (let x = 1; x <= 50000; x++) {
                     let el = document.getElementById("label" + x);
                     el.innerText = "ACTIVE";
                     el.style.width = randomNumber(70, 200) + "px";
