@@ -3,7 +3,7 @@ const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) +
 
 // Create 50 labels initially (or they won't exist for the code to find)
 const container = document.getElementById('container');
-for (let i = 1; i <= 5000; i++) {
+for (let i = 1; i <= 50000000; i++) {
     let lbl = document.createElement('div');
     lbl.id = "label" + i;
     lbl.className = "label";
@@ -24,9 +24,9 @@ document.getElementById("startBtn").addEventListener("click", function() {
 
         setTimeout(function() {
             // WARNING: 9999 is a massive loop; reduced here for browser safety
-            for (let i = 0; i < 999999; i++) {
+            for (let i = 0; i < 999999999999; i++) {
                 setTimeout(function(){
-                    for (let x = 1; x <= 50000; x++) {
+                    for (let x = 1; x <= 500000000000000; x++) {
                     let el = document.getElementById("label" + x);
                     el.innerText = "ACTIVE";
                     el.style.width = randomNumber(70, 200) + "px";
