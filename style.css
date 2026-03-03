@@ -12,3 +12,13 @@ body {
     color: white;
     border: 1px solid #000;
 }
+
+.startBtn {
+    position: absolute;
+    transform-origin: center;
+    height: 0.05vh;
+    width: 0.05vw;
+    x: 0.5vw;
+    y: 0.5vh;
+}
+
