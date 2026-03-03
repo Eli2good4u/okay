@@ -6,6 +6,7 @@
             margin: 0;
             overflow: hidden;
             font-family: 'Arial', sans-serif;
+            background: #0a0a0a;
         }
         
         #container {
@@ -22,11 +23,11 @@
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
             font-weight: bold;
-            font-size: 14px;
+            font-size: 16px;
             border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-            transition: all 0.05s linear;
-            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.5);
+            transition: all 0.05s ease;
         }
         
         #startBtn {
@@ -36,52 +37,193 @@
             transform: translateX(-50%);
             padding: 18px 40px;
             font-size: 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #ff0080 0%, #ff8c00 100%);
             color: white;
             border: none;
             border-radius: 50px;
             cursor: pointer;
             z-index: 1000;
             font-weight: bold;
-            letter-spacing: 1px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            letter-spacing: 2px;
+            box-shadow: 0 10px 30px rgba(255,0,128,0.5);
             border: 2px solid rgba(255,255,255,0.3);
+            text-transform: uppercase;
         }
         
         #startBtn:hover {
             transform: translateX(-50%) scale(1.1);
-            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         }
         
-        #startBtn:active {
-            transform: translateX(-50%) scale(0.95);
+        #countDisplay {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #ff0;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #ff0;
+            z-index: 1000;
+        }
+
+        #statusDisplay {
+            position: fixed;
+            top: 100px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            color: #0ff;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            border: 2px solid #0ff;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
-    <button id="startBtn">🚀 GO INFINITE 🚀</button>
+    <button id="startBtn">🎵 50MS PARTY 🎵</button>
+    <div id="countDisplay">Sounds: 0</div>
+    <div id="statusDisplay">Status: Ready</div>
     <div id="container"></div>
 
     <script>
         // Helper for random numbers
         const randomNumber = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-        // Create 500 labels initially
-        const container = document.getElementById('container');
-        for (let i = 1; i <= 500; i++) {
-            let lbl = document.createElement('div');
-            lbl.id = "label" + i;
-            lbl.className = "label";
-            lbl.innerText = "💤 SLEEP";
-            lbl.style.backgroundColor = "#2c3e50";
-            lbl.style.width = "100px";
-            lbl.style.height = "100px";
-            lbl.style.left = randomNumber(0, window.innerWidth - 120) + "px";
-            lbl.style.top = randomNumber(0, window.innerHeight - 120) + "px";
-            container.appendChild(lbl);
+        // Array to hold our 50 elements
+        let elements = [];
+        let soundCount = 0;
+        let isPlaying = false;
+        let audioEnabled = false;
+        
+        // Pre-load the audio to make it play faster
+        const audioCache = [];
+        for (let i = 0; i < 10; i++) {
+            let audio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
+            audio.load();
+            audioCache.push(audio);
+        }
+        let audioIndex = 0;
+
+        // Enable audio on first click anywhere
+        document.body.addEventListener('click', function enableAudio() {
+            audioEnabled = true;
+            document.getElementById('statusDisplay').innerHTML = 'Status: Audio Ready ✅';
+            
+            // Play a test sound to unlock audio
+            let testAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
+            testAudio.volume = 0.1;
+            testAudio.play().then(() => {
+                testAudio.pause();
+                testAudio.currentTime = 0;
+            }).catch(e => console.log("Test audio:", e));
+            
+            document.body.removeEventListener('click', enableAudio);
+            console.log("Audio enabled cuh!");
+        }, { once: true });
+
+        // Function to play sound instantly
+        function playSound() {
+            if (!audioEnabled || !isPlaying) return;
+            
+            soundCount++;
+            document.getElementById('countDisplay').innerHTML = `Sounds: ${soundCount}`;
+            
+            // Use cached audio for instant playback
+            let audio = audioCache[audioIndex];
+            audio.currentTime = 0;
+            audio.volume = 0.2;
+            
+            audio.play().catch(e => {
+                // If fail, create new one
+                let newAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
+                newAudio.volume = 0.2;
+                newAudio.play().catch(err => console.log("Still blocked:", err));
+            });
+            
+            // Cycle through cached audio
+            audioIndex = (audioIndex + 1) % audioCache.length;
         }
 
+        // Create initial 50 elements
+        function createInitialElements() {
+            const container = document.getElementById('container');
+            container.innerHTML = '';
+            elements = [];
+            
+            for (let i = 0; i < 50; i++) {
+                let lbl = document.createElement('div');
+                lbl.className = 'label';
+                lbl.id = 'element_' + i;
+                
+                // Set initial random properties
+                let size = randomNumber(40, 150);
+                lbl.style.width = size + "px";
+                lbl.style.height = size + "px";
+                lbl.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
+                lbl.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
+                lbl.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+                lbl.innerText = ["💯", "🔥", "🚀", "⚡", "🎵", "CUH"][Math.floor(Math.random() * 6)];
+                
+                container.appendChild(lbl);
+                elements.push(lbl);
+            }
+        }
+
+        // Update all elements with random properties
+        function updateAllElements() {
+            elements.forEach(el => {
+                // Random text
+                const texts = ["💯", "🔥", "🚀", "⚡", "🎵", "CUH", "LIT", "FIRE", "WAVE", "🤙", "50", "ms"];
+                el.innerText = texts[Math.floor(Math.random() * texts.length)];
+                
+                // Random size between 40 and 150px
+                let size = randomNumber(40, 150);
+                el.style.width = size + "px";
+                el.style.height = size + "px";
+                
+                // Random position
+                el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
+                el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
+                
+                // Random bright colors
+                el.style.backgroundColor = `rgb(${randomNumber(0,255)},${randomNumber(0,255)},${randomNumber(0,255)})`;
+                
+                // Random rotation
+                el.style.transform = `rotate(${randomNumber(-15, 15)}deg)`;
+                
+                // Random border radius
+                el.style.borderRadius = randomNumber(0, 50) + "%";
+            });
+            
+            // Play sound EVERY time shapes change
+            playSound();
+        }
+
+        // Main animation loop - updates every 50ms
+        function startInfiniteLoop() {
+            if (!isPlaying) return;
+            
+            // Update all 50 elements and play sound
+            updateAllElements();
+            
+            // Call itself again after 50ms
+            setTimeout(startInfiniteLoop, 50);
+        }
+
+        // Initialize
+        createInitialElements();
+
         document.getElementById("startBtn").addEventListener("click", function() {
+            if (isPlaying) return;
+            
+            // Reset sound count
+            soundCount = 0;
+            document.getElementById('countDisplay').innerHTML = `Sounds: 0`;
+            
             let stateA = false;
             let stateB = true;
 
@@ -90,66 +232,59 @@
             }
 
             if (stateB === true && stateA === true) {
-                // Play sound with better error handling
-                let audio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
-                audio.volume = 0.7;
-                audio.play().catch(e => console.log("Click the page first to enable audio:", e));
-
-                // Change button text to show it's active
-                document.getElementById("startBtn").textContent = "🔴 INFINITE MODE ACTIVE 🔴";
-                document.getElementById("startBtn").style.background = "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)";
-
-                setTimeout(function() {
-                    // INFINITE LOOP - runs forever every 50ms (like 9999 but literally forever)
-                    function updateLabels() {
-                        // Loop through all 500 labels
-                        for (let x = 1; x <= 500; x++) {
-                            let el = document.getElementById("label" + x);
-                            if (el) {
-                                // Random text every time
-                                const texts = ["LIT", "🔥", "FIRE", "YO", "CUH", "💯", "ACTIVE", "WAVE", "VIBE", "🤙", "FLEX", "GANG"];
-                                el.innerText = texts[Math.floor(Math.random() * texts.length)];
-                                
-                                // Random size between 50 and 250px
-                                let size = randomNumber(50, 250);
-                                el.style.width = size + "px";
-                                el.style.height = size + "px";
-                                
-                                // Random position (keep within window)
-                                el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
-                                el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
-                                
-                                // Random bright colors
-                                el.style.backgroundColor = `rgb(${randomNumber(100,255)},${randomNumber(100,255)},${randomNumber(100,255)})`;
-                                
-                                // Random rotation for extra spice
-                                el.style.transform = `rotate(${randomNumber(-15, 15)}deg)`;
-                                
-                                // Random border radius
-                                el.style.borderRadius = randomNumber(0, 50) + "%";
-                            }
-                        }
-                        
-                        // Call itself again after 50ms - INFINITE LOOP
-                        setTimeout(updateLabels, 50);
+                isPlaying = true;
+                
+                // Change button
+                this.textContent = "🔴 PARTY ACTIVE (50ms) 🔴";
+                this.style.background = "linear-gradient(135deg, #ff0000 0%, #ff0066 100%)";
+                document.getElementById('statusDisplay').innerHTML = 'Status: PARTY MODE 🎉';
+                
+                // If audio not enabled yet, force enable
+                if (!audioEnabled) {
+                    audioEnabled = true;
+                    // Play a silent sound to unlock
+                    let unlockAudio = new Audio("https://files.voicy.network/public/Content/Clips/Sound/b51233ad-f2a1-49c5-a560-1c38a890d6a5.mp3");
+                    unlockAudio.volume = 0.01;
+                    unlockAudio.play().catch(e => console.log("Unlock attempt:", e));
+                }
+                
+                // Start immediately after 2 seconds
+                setTimeout(() => {
+                    if (isPlaying) {
+                        startInfiniteLoop();
                     }
-                    
-                    updateLabels(); // Start the infinite animation
-                }, 2000); // 2 second delay
+                }, 2000);
             }
         });
 
-        // Update positions on window resize so squares stay visible
+        // Handle window resize
         window.addEventListener('resize', function() {
-            for (let x = 1; x <= 500; x++) {
-                let el = document.getElementById("label" + x);
-                if (el) {
+            if (elements.length > 0 && !isPlaying) {
+                elements.forEach(el => {
                     let size = parseInt(el.style.width) || 100;
                     el.style.left = randomNumber(0, window.innerWidth - size - 20) + "px";
                     el.style.top = randomNumber(0, window.innerHeight - size - 20) + "px";
-                }
+                });
             }
         });
+
+        // Stop party (double click anywhere)
+        document.body.addEventListener('dblclick', function() {
+            if (isPlaying) {
+                isPlaying = false;
+                createInitialElements();
+                document.getElementById("startBtn").textContent = "🎵 50MS PARTY 🎵";
+                document.getElementById("startBtn").style.background = "linear-gradient(135deg, #ff0080 0%, #ff8c00 100%)";
+                document.getElementById('statusDisplay').innerHTML = 'Status: Stopped ⏹️';
+                soundCount = 0;
+                document.getElementById('countDisplay').innerHTML = `Sounds: 0`;
+                console.log("Party stopped cuh!");
+            }
+        });
+
+        // Click instructions
+        console.log("Click anywhere first to enable audio, then hit the button cuh!");
+
     </script>
 </body>
 </html>
